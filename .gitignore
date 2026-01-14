@@ -31,3 +31,4 @@ go.work.sum
 # Editor/IDE
 .idea/
 .vscode/
+/secrets/298d0-fbsvc-e11b1c9f2b.json
