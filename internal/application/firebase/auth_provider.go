@@ -13,7 +13,7 @@ type AuthProvider struct {
 	client *fbAuth.Client
 }
 
-func NewAuthProvider(client *fbAuth.Client) *AuthProvider {
+func NewAuthProvider(client *fbAuth.Client) auth.Provider {
 	return &AuthProvider{client: client}
 }
 
