@@ -1,4 +1,4 @@
-package account
+package vo
 
 import (
 	"crypto/rand"

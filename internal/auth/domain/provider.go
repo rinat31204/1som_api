@@ -1,6 +1,8 @@
-package auth
+package domain
 
-import "context"
+import (
+	"context"
+)
 
 type Provider interface {
 	VerifyToken(ctx context.Context, token string) (*User, error)

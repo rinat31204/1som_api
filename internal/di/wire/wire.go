@@ -10,9 +10,10 @@ import (
 
 func InitializeApp() (*gin.Engine, error) {
 	wire.Build(
-		FirebaseSet,
+		InfraSet,
 		HandlerSet,
-		RouterSet,
+		AuthSet,
+		DeliverySet,
 	)
 	return nil, nil
 }

@@ -8,8 +8,10 @@ package wire
 
 import (
 	"1som/internal/application/firebase"
+	firebase2 "1som/internal/auth/infrastructure/firebase"
 	"1som/internal/delivery/http"
 	"1som/internal/delivery/http/handlers"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,7 +20,7 @@ import (
 func InitializeApp() (*gin.Engine, error) {
 	app := firebase.NewApp()
 	client := firebase.NewAuthClient(app)
-	provider := firebase.NewAuthProvider(client)
+	provider := firebase2.NewFirebaseProvider(client)
 	userHandler := handlers.NewUserHandler()
 	walletHandler := handlers.NewWalletHandler()
 	winnersHandler := handlers.NewWinnersHandler()

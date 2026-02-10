@@ -1,16 +1,16 @@
 package http
 
 import (
-	"1som/internal/application/auth"
+	"1som/internal/auth/application"
+	"1som/internal/auth/delivery/http/middleware"
 	"1som/internal/delivery/http/handlers"
-	"1som/internal/delivery/http/middleware"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type RouterDeps struct {
-	AuthProvider auth.Provider
+	AuthService *application.AuthService
 
 	UserHandler    *handlers.UserHandler
 	WalletHandler  *handlers.WalletHandler
@@ -41,7 +41,7 @@ func NewRouter(deps RouterDeps) *gin.Engine {
 	api.GET("/winner-detail/:id", deps.WinnersHandler.GetWinnerDetail)
 
 	// ---------- PROTECTED ----------
-	authMiddleware := middleware.NewAuthMiddleware(deps.AuthProvider)
+	authMiddleware := middleware.NewAuthMiddleware(*deps.AuthService)
 
 	protected := api.Group("/")
 	protected.Use(authMiddleware)

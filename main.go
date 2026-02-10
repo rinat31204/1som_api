@@ -1,7 +1,7 @@
 package main
 
 import (
-	"1som/internal/wire"
+	"1som/internal/di/wire"
 	"log"
 )
 

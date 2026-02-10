@@ -2,6 +2,7 @@ package firebase
 
 import (
 	"1som/internal/application/auth"
+	"1som/internal/auth/domain"
 	"context"
 	"errors"
 	"strings"
@@ -9,15 +10,15 @@ import (
 	fbAuth "firebase.google.com/go/v4/auth"
 )
 
-type AuthProvider struct {
+type Provider struct {
 	client *fbAuth.Client
 }
 
-func NewAuthProvider(client *fbAuth.Client) auth.Provider {
-	return &AuthProvider{client: client}
+func NewFirebaseProvider(client *fbAuth.Client) domain.Provider {
+	return &Provider{client: client}
 }
 
-func (p *AuthProvider) VerifyToken(
+func (p *Provider) VerifyToken(
 	ctx context.Context,
 	token string,
 ) (*auth.User, error) {

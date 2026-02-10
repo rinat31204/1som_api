@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"1som/internal/application/auth"
+	"1som/internal/auth/application"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -9,7 +9,7 @@ import (
 
 const ContextUserKey = "auth_user"
 
-func NewAuthMiddleware(provider auth.Provider) gin.HandlerFunc {
+func NewAuthMiddleware(authService application.AuthService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
@@ -19,7 +19,7 @@ func NewAuthMiddleware(provider auth.Provider) gin.HandlerFunc {
 			return
 		}
 
-		user, err := provider.VerifyToken(
+		user, err := authService.VerifyAndGetUser(
 			c.Request.Context(),
 			authHeader,
 		)
