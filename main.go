@@ -1,32 +1,17 @@
 package main
 
 import (
-	"1som/internal/application/firebase"
-	"1som/internal/delivery/http"
-	"1som/internal/delivery/http/handlers"
+	"1som/internal/wire"
+	"log"
 )
 
 func main() {
-	// Firebase
-	app := firebase.NewApp()
-	authClient := firebase.NewAuthClient(app)
-	authProvider := firebase.NewAuthProvider(authClient)
-
-	// Handlers
-	userHandler := handlers.NewUserHandler()
-	walletHandler := handlers.NewWalletHandler()
-	winnersHandler := handlers.NewWinnersHandler()
-
-	// Router
-	r := http.NewRouter(http.RouterDeps{
-		AuthProvider:   authProvider,
-		UserHandler:    userHandler,
-		WalletHandler:  walletHandler,
-		WinnersHandler: winnersHandler,
-	})
-
-	err := r.Run(":8080")
+	r, err := wire.InitializeApp()
 	if err != nil {
-		return
+		log.Fatal(err)
+	}
+
+	if err := r.Run(":8080"); err != nil {
+		log.Fatal(err)
 	}
 }
