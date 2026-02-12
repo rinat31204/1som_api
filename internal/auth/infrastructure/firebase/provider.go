@@ -1,7 +1,6 @@
 package firebase
 
 import (
-	"1som/internal/application/auth"
 	"1som/internal/auth/domain"
 	"context"
 	"errors"
@@ -21,7 +20,7 @@ func NewFirebaseProvider(client *fbAuth.Client) domain.Provider {
 func (p *Provider) VerifyToken(
 	ctx context.Context,
 	token string,
-) (*auth.User, error) {
+) (*domain.User, error) {
 
 	if token == "" {
 		return nil, errors.New("empty token")
@@ -35,7 +34,7 @@ func (p *Provider) VerifyToken(
 		return nil, err
 	}
 
-	return &auth.User{
+	return &domain.User{
 		UID:   idToken.UID,
 		Email: idToken.Claims["email"].(string),
 	}, nil
