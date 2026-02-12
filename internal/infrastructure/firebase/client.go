@@ -15,9 +15,9 @@ type Client struct {
 }
 
 // NewClient создает новый Firebase клиент
-func NewClient(ctx context.Context) (*Client, error) {
+func NewClient() (*fbAuth.Client, error) {
 	opt := option.WithCredentialsFile("secrets/298d0-fbsvc-e11b1c9f2b.json")
-
+	ctx := context.Background()
 	app, err := firebase.NewApp(ctx, nil, opt)
 	if err != nil {
 		return nil, err
@@ -28,8 +28,10 @@ func NewClient(ctx context.Context) (*Client, error) {
 		return nil, err
 	}
 
-	return &Client{
-		App:  app,
-		Auth: auth,
-	}, nil
+	//return &Client{
+	//	App:  app,
+	//	Auth: auth,
+	//}, nil
+
+	return auth, nil
 }

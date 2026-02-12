@@ -2,7 +2,6 @@ package wire
 
 import (
 	"1som/internal/auth/application"
-	authDomain "1som/internal/auth/domain"
 	authFirebase "1som/internal/auth/infrastructure/firebase"
 	"1som/internal/delivery/http"
 	"1som/internal/delivery/http/handlers"
@@ -18,7 +17,7 @@ var InfraSet = wire.NewSet(
 var AuthSet = wire.NewSet(
 	authFirebase.NewFirebaseProvider,
 	application.NewAuthService,
-	wire.Bind(new(authDomain.Provider), new(*authFirebase.Provider)),
+	//wire.Bind(new(authDomain.Provider), new(*authFirebase.Provider)),
 )
 
 var HandlerSet = wire.NewSet(

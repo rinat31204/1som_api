@@ -7,24 +7,27 @@
 package wire
 
 import (
-	"1som/internal/application/firebase"
+	"1som/internal/auth/application"
 	firebase2 "1som/internal/auth/infrastructure/firebase"
 	"1som/internal/delivery/http"
 	"1som/internal/delivery/http/handlers"
-
+	"1som/internal/infrastructure/firebase"
 	"github.com/gin-gonic/gin"
 )
 
 // Injectors from wire.go:
 
 func InitializeApp() (*gin.Engine, error) {
-	app := firebase.NewApp()
-	client := firebase.NewAuthClient(app)
+	client, err := firebase.NewClient()
+	if err != nil {
+		return nil, err
+	}
 	provider := firebase2.NewFirebaseProvider(client)
+	authService := application.NewAuthService(provider)
 	userHandler := handlers.NewUserHandler()
 	walletHandler := handlers.NewWalletHandler()
 	winnersHandler := handlers.NewWinnersHandler()
-	routerDeps := NewRouterDeps(provider, userHandler, walletHandler, winnersHandler)
+	routerDeps := provideRouterDeps(authService, userHandler, walletHandler, winnersHandler)
 	engine := http.NewRouter(routerDeps)
 	return engine, nil
 }
