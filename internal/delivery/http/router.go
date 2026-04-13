@@ -20,40 +20,29 @@ type RouterDeps struct {
 func NewRouter(deps RouterDeps) *gin.Engine {
 	r := gin.New()
 
-	// глобальные middleware
 	r.Use(
 		gin.Recovery(),
 		gin.Logger(),
 	)
 
-	// healthcheck
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
-	// =========================
-	// API
-	// =========================
 	api := r.Group("/api")
 
-	// ---------- PUBLIC ----------
-	api.GET("/winners", deps.WinnersHandler.GetWinners)
-	api.GET("/winner-detail/:id", deps.WinnersHandler.GetWinnerDetail)
-
-	// ---------- PROTECTED ----------
 	authMiddleware := middleware.NewAuthMiddleware(*deps.AuthService)
 
 	protected := api.Group("/")
 	protected.Use(authMiddleware)
-
 	{
-		// USER
 		protected.GET("/user-info", deps.UserHandler.GetUserInfo)
 
-		// WALLET
 		protected.GET("/wallet", deps.WalletHandler.GetWallet)
 		protected.GET("/wallet/balance", deps.WalletHandler.GetBalance)
-	}
 
+		protected.GET("/winners", deps.WinnersHandler.GetWinners)
+		protected.GET("/winner-detail/:id", deps.WinnersHandler.GetWinnerDetail)
+	}
 	return r
 }

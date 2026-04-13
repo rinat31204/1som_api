@@ -1,5 +1,5 @@
 package wallet
 
 type Repository interface {
-	Create(wallet Wallet) error
+	Create(wallet *Wallet) error
 }

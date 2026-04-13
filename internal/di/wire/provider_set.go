@@ -1,17 +1,32 @@
 package wire
 
 import (
+	"1som/internal/application/service"
 	"1som/internal/auth/application"
 	authFirebase "1som/internal/auth/infrastructure/firebase"
 	"1som/internal/delivery/http"
 	"1som/internal/delivery/http/handlers"
+	"1som/internal/infrastructure/eventbus/inmemory"
 	infraFirebase "1som/internal/infrastructure/firebase"
+	"1som/internal/infrastructure/postgres"
+	"1som/internal/infrastructure/postgres/repository"
 
 	"github.com/google/wire"
 )
 
 var InfraSet = wire.NewSet(
 	infraFirebase.NewClient,
+	inmemory.NewEventBus,
+	wire.Bind(new(service.EventBus), new(*inmemory.EventBus)),
+)
+
+var RepositorySet = wire.NewSet(
+	repository.NewUserRepository,
+	repository.NewWalletRepository,
+)
+
+var UnitOfWorkSet = wire.NewSet(
+	postgres.NewUnitOfWorkFactory,
 )
 
 var AuthSet = wire.NewSet(
@@ -24,6 +39,10 @@ var HandlerSet = wire.NewSet(
 	handlers.NewUserHandler,
 	handlers.NewWalletHandler,
 	handlers.NewWinnersHandler,
+)
+
+var ServiceSet = wire.NewSet(
+	service.NewUserService,
 )
 
 var DeliverySet = wire.NewSet(

@@ -8,6 +8,6 @@ import (
 
 type Wallet struct {
 	Id        uuid.UUID
-	UserId    uuid.UUID
+	UserId    string
 	CreatedAt time.Time
 }

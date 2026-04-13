@@ -1,5 +1,5 @@
 package transaction
 
 type Repository interface {
-	Create(transaction Transaction) error
+	Create(transaction *Transaction) error
 }

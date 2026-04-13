@@ -29,13 +29,13 @@ func (p *Provider) VerifyToken(
 	token = strings.TrimSpace(token)
 	token = strings.TrimPrefix(token, "Bearer ")
 
-	idToken, err := p.client.VerifyIDToken(ctx, token)
+	authToken, err := p.client.VerifyIDToken(ctx, token)
 	if err != nil {
 		return nil, err
 	}
 
 	return &domain.User{
-		UID:   idToken.UID,
-		Email: idToken.Claims["email"].(string),
+		UID:   authToken.UID,
+		Email: authToken.Claims["email"].(string),
 	}, nil
 }

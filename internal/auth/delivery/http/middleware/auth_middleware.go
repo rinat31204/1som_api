@@ -19,7 +19,7 @@ func NewAuthMiddleware(authService application.AuthService) gin.HandlerFunc {
 			return
 		}
 
-		user, err := authService.VerifyAndGetUser(
+		user, err := authService.VerifyUser(
 			c.Request.Context(),
 			authHeader,
 		)
