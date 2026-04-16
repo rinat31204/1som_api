@@ -9,11 +9,10 @@ import (
 )
 
 type userRepository struct {
-	db *sql.DB // for non‑transactional queries
-	tx *sql.Tx // optional – used when inside a UoW
+	db *sql.DB
+	tx *sql.Tx
 }
 
-// NewUserRepository returns a repository that works with either *sql.DB or *sql.Tx.
 func NewUserRepository(conn interface{}) user.Repository {
 	switch v := conn.(type) {
 	case *sql.DB:
@@ -45,10 +44,10 @@ func (r *userRepository) Create(u *user.User) error {
 	return err
 }
 
-func (r *userRepository) ExistsUser(id string) (bool, error) {
+func (r *userRepository) ExistsUserByIdOrEmail(id, email string) (bool, error) {
 	var exists bool
 	err := r.getExecer().QueryRowContext(context.Background(),
-		`SELECT EXISTS(SELECT 1 FROM users WHERE id = $1)`, id).Scan(&exists)
+		`SELECT EXISTS(SELECT 1 FROM users WHERE id = $1 OR email = $2)`, id, email).Scan(&exists)
 	return exists, err
 }
 

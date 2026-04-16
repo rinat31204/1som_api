@@ -23,6 +23,8 @@ var InfraSet = wire.NewSet(
 var RepositorySet = wire.NewSet(
 	repository.NewUserRepository,
 	repository.NewWalletRepository,
+	repository.NewAccountRepository,
+	repository.NewTransactionRepository,
 )
 
 var UnitOfWorkSet = wire.NewSet(

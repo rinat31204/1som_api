@@ -7,11 +7,10 @@ import (
 )
 
 type walletRepository struct {
-	db *sql.DB // for non‑transactional queries
-	tx *sql.Tx // optional – used when inside a UoW
+	db *sql.DB
+	tx *sql.Tx
 }
 
-// NewUserRepository returns a repository that works with either *sql.DB or *sql.Tx.
 func NewWalletRepository(conn interface{}) wallet.Repository {
 	switch v := conn.(type) {
 	case *sql.DB:

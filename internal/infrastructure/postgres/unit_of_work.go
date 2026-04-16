@@ -5,6 +5,7 @@ import (
 	"1som/internal/infrastructure/postgres/repository"
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log/slog"
 
@@ -14,7 +15,6 @@ import (
 	"1som/internal/domain/wallet"
 )
 
-// UnitOfWork implements the unitofwork.UnitOfWork interface.
 type UnitOfWork struct {
 	db *sql.DB
 	tx *sql.Tx
@@ -25,14 +25,10 @@ type UnitOfWork struct {
 	transactionRepo transaction.Repository
 }
 
-// NewUnitOfWork creates a new UnitOfWork factory.
-// It does NOT start a transaction yet – call Begin() for that.
 func NewUnitOfWork(db *sql.DB) unitOfWork.UnitOfWork {
 	return &UnitOfWork{db: db}
 }
 
-// NewUnitOfWorkFactory возвращает функцию, которая создаёт новый UoW.
-// Она нужна для UserService, чтобы начинать транзакции по требованию.
 func NewUnitOfWorkFactory(db *sql.DB) func() unitOfWork.UnitOfWork {
 	return func() unitOfWork.UnitOfWork {
 		return NewUnitOfWork(db)
@@ -49,12 +45,10 @@ func (u *UnitOfWork) Begin(ctx context.Context) error {
 	}
 	u.tx = tx
 
-	// Initialise repositories with the transaction.
-	// (We'll create them lazily in the getters if you prefer.)
-	u.userRepo = repository.NewUserRepository(u.tx)     // your PostgreSQL user repo
-	u.walletRepo = repository.NewWalletRepository(u.tx) // wallet repo
-	u.accountRepo = NewAccountRepository(u.tx)          // account repo
-	u.transactionRepo = NewTransactionRepository(u.tx)  // transaction repo
+	u.userRepo = repository.NewUserRepository(u.tx)
+	u.walletRepo = repository.NewWalletRepository(u.tx)
+	u.accountRepo = repository.NewAccountRepository(u.tx)
+	u.transactionRepo = repository.NewTransactionRepository(u.tx)
 
 	slog.Debug("transaction started")
 	return nil
@@ -78,7 +72,7 @@ func (u *UnitOfWork) Rollback(ctx context.Context) error {
 		return fmt.Errorf("no active transaction")
 	}
 	err := u.tx.Rollback()
-	if err != nil && err != sql.ErrTxDone {
+	if err != nil && !errors.Is(err, sql.ErrTxDone) {
 		return fmt.Errorf("rollback tx: %w", err)
 	}
 	u.tx = nil
@@ -86,8 +80,6 @@ func (u *UnitOfWork) Rollback(ctx context.Context) error {
 	return nil
 }
 
-// Complete can be used for cleanup (e.g., close connections).
-// For this implementation it's a no-op, but you might want to rollback if tx is still open.
 func (u *UnitOfWork) Complete() error {
 	if u.tx != nil {
 		slog.Warn("unit of work completed with an active transaction, rolling back")
@@ -96,7 +88,6 @@ func (u *UnitOfWork) Complete() error {
 	return nil
 }
 
-// Repository getters return the transaction‑scoped implementations.
 func (u *UnitOfWork) UserRepo() user.Repository {
 	return u.userRepo
 }

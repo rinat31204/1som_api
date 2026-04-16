@@ -61,7 +61,7 @@ func (u *UserService) createUser(ctx context.Context, user *user.User) error {
 		_ = uow.Rollback(ctx)
 	}()
 
-	exists, err := uow.UserRepo().ExistsUser(user.Id)
+	exists, err := uow.UserRepo().ExistsUserByIdOrEmail(user.Id, user.Email)
 	if err != nil {
 		return err
 	}
