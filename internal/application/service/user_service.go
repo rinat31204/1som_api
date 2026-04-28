@@ -43,15 +43,15 @@ func (u *UserService) subscribe() {
 			CreatedAt: time.Now(),
 		}
 
-		err := u.createUser(context.Background(), &domainUser)
+		err := u.CreateUser(context.Background(), &domainUser)
 		if err != nil {
 			return
 		}
-		slog.Info("User created: ", domainUser)
+		slog.Info("User created: ", slog.Any("user", domainUser))
 	})
 }
 
-func (u *UserService) createUser(ctx context.Context, user *user.User) error {
+func (u *UserService) CreateUser(ctx context.Context, user *user.User) error {
 	uow := u.uowFactory()
 
 	if err := uow.Begin(ctx); err != nil {
@@ -61,21 +61,21 @@ func (u *UserService) createUser(ctx context.Context, user *user.User) error {
 		_ = uow.Rollback(ctx)
 	}()
 
-	if err := u.createUserEntity(ctx, uow, user); err != nil {
+	if err := u.CreateUserEntity(ctx, uow, user); err != nil {
 		return err
 	}
 
-	wal, err := u.createWallet(ctx, uow, user)
+	wal, err := u.CreateWallet(ctx, uow, user)
 	if err != nil {
 		return err
 	}
 
-	acc, err := u.createAccount(ctx, uow, wal)
+	acc, err := u.CreateAccount(ctx, uow, wal)
 	if err != nil {
 		return err
 	}
 
-	if err := u.createInitialTransaction(ctx, uow, acc); err != nil {
+	if err := u.CreateInitialTransaction(ctx, uow, acc); err != nil {
 		return err
 	}
 
@@ -83,10 +83,9 @@ func (u *UserService) createUser(ctx context.Context, user *user.User) error {
 		return err
 	}
 	return nil
-
 }
 
-func (u *UserService) createUserEntity(
+func (u *UserService) CreateUserEntity(
 	ctx context.Context,
 	uow unitOfWork.UnitOfWork,
 	user *user.User) error {
@@ -101,7 +100,7 @@ func (u *UserService) createUserEntity(
 	return uow.UserRepo().Create(user)
 }
 
-func (u *UserService) createWallet(
+func (u *UserService) CreateWallet(
 	ctx context.Context,
 	uow unitOfWork.UnitOfWork,
 	user *user.User) (*wallet.Wallet, error) {
@@ -118,7 +117,7 @@ func (u *UserService) createWallet(
 	return wal, nil
 }
 
-func (u *UserService) createAccount(
+func (u *UserService) CreateAccount(
 	ctx context.Context,
 	uow unitOfWork.UnitOfWork,
 	wal *wallet.Wallet) (*account.Account, error) {
@@ -144,7 +143,7 @@ func (u *UserService) createAccount(
 	return acc, nil
 }
 
-func (u *UserService) createInitialTransaction(
+func (u *UserService) CreateInitialTransaction(
 	ctx context.Context,
 	uow unitOfWork.UnitOfWork,
 	acc *account.Account) error {
