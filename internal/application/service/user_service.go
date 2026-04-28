@@ -61,6 +61,35 @@ func (u *UserService) createUser(ctx context.Context, user *user.User) error {
 		_ = uow.Rollback(ctx)
 	}()
 
+	if err := u.createUserEntity(ctx, uow, user); err != nil {
+		return err
+	}
+
+	wal, err := u.createWallet(ctx, uow, user)
+	if err != nil {
+		return err
+	}
+
+	acc, err := u.createAccount(ctx, uow, wal)
+	if err != nil {
+		return err
+	}
+
+	if err := u.createInitialTransaction(ctx, uow, acc); err != nil {
+		return err
+	}
+
+	if err := uow.Commit(ctx); err != nil {
+		return err
+	}
+	return nil
+
+}
+
+func (u *UserService) createUserEntity(
+	ctx context.Context,
+	uow unitOfWork.UnitOfWork,
+	user *user.User) error {
 	exists, err := uow.UserRepo().ExistsUserByIdOrEmail(user.Id, user.Email)
 	if err != nil {
 		return err
@@ -69,22 +98,36 @@ func (u *UserService) createUser(ctx context.Context, user *user.User) error {
 		return errors.New("user already exists")
 	}
 
-	if err := uow.UserRepo().Create(user); err != nil {
-		return err
-	}
+	return uow.UserRepo().Create(user)
+}
 
-	wal := wallet.Wallet{
+func (u *UserService) createWallet(
+	ctx context.Context,
+	uow unitOfWork.UnitOfWork,
+	user *user.User) (*wallet.Wallet, error) {
+	wal := &wallet.Wallet{
 		Id:        uuid.New(),
 		UserId:    user.Id,
 		CreatedAt: time.Now(),
 	}
-	if err := uow.WalletRepo().Create(&wal); err != nil {
-		return err
+
+	if err := uow.WalletRepo().Create(wal); err != nil {
+		return nil, err
 	}
 
-	an, _ := vo.GenerateAccountNumber()
+	return wal, nil
+}
 
-	acc := account.Account{
+func (u *UserService) createAccount(
+	ctx context.Context,
+	uow unitOfWork.UnitOfWork,
+	wal *wallet.Wallet) (*account.Account, error) {
+	an, err := vo.GenerateAccountNumber()
+	if err != nil {
+		return nil, err
+	}
+
+	acc := &account.Account{
 		Id:            uuid.New(),
 		WalletId:      wal.Id,
 		AccountNumber: an,
@@ -93,25 +136,27 @@ func (u *UserService) createUser(ctx context.Context, user *user.User) error {
 		Balance:       1000,
 		Currency:      currency.DefaultCurrency,
 	}
-	if err := uow.AccountRepo().Create(&acc); err != nil {
-		return err
+
+	if err := uow.AccountRepo().Create(acc); err != nil {
+		return nil, err
 	}
 
-	tx := transaction.Transaction{
+	return acc, nil
+}
+
+func (u *UserService) createInitialTransaction(
+	ctx context.Context,
+	uow unitOfWork.UnitOfWork,
+	acc *account.Account) error {
+	tx := &transaction.Transaction{
 		ID:            uuid.New(),
-		AccountNumber: an,
+		AccountNumber: acc.AccountNumber,
 		Amount:        1000,
 		Currency:      currency.DefaultCurrency,
 		Description:   "initial transaction",
 		Type:          transaction.Debit,
 		CreatedAt:     time.Now(),
 	}
-	if err := uow.TransactionRepo().Create(&tx); err != nil {
-		return err
-	}
 
-	if err := uow.Commit(ctx); err != nil {
-		return err
-	}
-	return nil
+	return uow.TransactionRepo().Create(tx)
 }

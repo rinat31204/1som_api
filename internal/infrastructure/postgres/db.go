@@ -8,7 +8,7 @@ import (
 )
 
 func NewDB() (*sql.DB, error) {
-	dsn := os.Getenv("DATABASE_URL") // или из конфига
+	dsn := os.Getenv("postgres://som_user:som_password_pwd@postgres:5432/som?sslmode=disable")
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		return nil, err

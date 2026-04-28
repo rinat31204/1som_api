@@ -11,6 +11,7 @@ import (
 func InitializeApp() (*gin.Engine, error) {
 	wire.Build(
 		InfraSet,
+		DBSet,
 		HandlerSet,
 		RepositorySet,
 		UnitOfWorkSet,
