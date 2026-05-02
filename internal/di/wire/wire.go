@@ -12,11 +12,10 @@ func InitializeApp() (*gin.Engine, error) {
 	wire.Build(
 		InfraSet,
 		DBSet,
+		UseCaseSet,
 		HandlerSet,
 		RepositorySet,
-		UnitOfWorkSet,
 		AuthSet,
-		ServiceSet,
 		DeliverySet,
 	)
 	return nil, nil

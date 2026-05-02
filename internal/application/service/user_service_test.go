@@ -150,7 +150,7 @@ func TestUserService_createWallet_CreateError(t *testing.T) {
 	svc := service.NewUserService(func() unitOfWork.UnitOfWork { return uow }, fakeBus)
 
 	testUser := &user.User{Id: "user-123"}
-	expectedErr := errors.New("wallet insert failed")
+	expectedErr := errors.New("account insert failed")
 
 	walletRepo.On("Create", mock.Anything).Return(expectedErr).Once()
 
@@ -272,7 +272,7 @@ func TestUserService_CreateWallet_Error_RollbackOnce(t *testing.T) {
 	userID := ""
 	email := "test@example.com"
 	event := service.UserVerifiedEvent{UserID: userID, Email: email}
-	expectedErr := errors.New("wallet insert failed")
+	expectedErr := errors.New("account insert failed")
 
 	uow.On("Begin", mock.Anything).Return(nil).Once()
 	userRepo.On("ExistsUserByIdOrEmail", userID, email).Return(false, nil).Once()

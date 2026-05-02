@@ -1,5 +1,8 @@
 package wallet
 
+import "context"
+
 type Repository interface {
-	Create(wallet *Wallet) error
+	Create(ctx context.Context, wallet *Wallet) error
+	GetByUser(ctx context.Context, uid string) (*Wallet, error)
 }

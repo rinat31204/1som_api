@@ -1,6 +1,7 @@
 package wallet
 
-type WalletDto struct {
-	AccountNumber string
-	Balance       int64
+type Dto struct {
+	UId           string `json:"user_id"`
+	AccountNumber string `json:"account_number"`
+	Balance       int64  `json:"balance"`
 }

@@ -1,5 +1,7 @@
 package transaction
 
+import "context"
+
 type Repository interface {
-	Create(transaction *Transaction) error
+	Create(ctx context.Context, transaction *Transaction) error
 }

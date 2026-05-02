@@ -89,7 +89,7 @@ func (u *UserService) CreateUserEntity(
 	ctx context.Context,
 	uow unitOfWork.UnitOfWork,
 	user *user.User) error {
-	exists, err := uow.UserRepo().ExistsUserByIdOrEmail(user.Id, user.Email)
+	exists, err := uow.UserRepo().ExistsUserByIdOrEmail(ctx, user.Id, user.Email)
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (u *UserService) CreateUserEntity(
 		return errors.New("user already exists")
 	}
 
-	return uow.UserRepo().Create(user)
+	return uow.UserRepo().Create(ctx, user)
 }
 
 func (u *UserService) CreateWallet(
@@ -110,7 +110,7 @@ func (u *UserService) CreateWallet(
 		CreatedAt: time.Now(),
 	}
 
-	if err := uow.WalletRepo().Create(wal); err != nil {
+	if err := uow.WalletRepo().Create(ctx, wal); err != nil {
 		return nil, err
 	}
 
@@ -136,7 +136,7 @@ func (u *UserService) CreateAccount(
 		Currency:      currency.DefaultCurrency,
 	}
 
-	if err := uow.AccountRepo().Create(acc); err != nil {
+	if err := uow.AccountRepo().Create(ctx, acc); err != nil {
 		return nil, err
 	}
 
@@ -157,5 +157,5 @@ func (u *UserService) CreateInitialTransaction(
 		CreatedAt:     time.Now(),
 	}
 
-	return uow.TransactionRepo().Create(tx)
+	return uow.TransactionRepo().Create(ctx, tx)
 }

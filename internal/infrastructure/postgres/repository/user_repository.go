@@ -8,52 +8,31 @@ import (
 	"1som/internal/domain/user"
 )
 
-type userRepository struct {
-	db *sql.DB
-	tx *sql.Tx
+type UserRepository struct {
+	conn DbTx
 }
 
-func NewUserRepository(conn interface{}) user.Repository {
-	switch v := conn.(type) {
-	case *sql.DB:
-		return &userRepository{db: v}
-	case *sql.Tx:
-		return &userRepository{tx: v}
-	default:
-		panic("unsupported connection type")
-	}
+func NewUserRepository(conn DbTx) user.Repository {
+	return &UserRepository{conn: conn}
 }
 
-func (r *userRepository) getExecer() exec {
-	if r.tx != nil {
-		return r.tx
-	}
-	return r.db
-}
-
-type exec interface {
-	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
-	QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row
-	QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
-}
-
-func (r *userRepository) Create(u *user.User) error {
-	_, err := r.getExecer().ExecContext(context.Background(),
+func (r *UserRepository) Create(ctx context.Context, u *user.User) error {
+	_, err := r.conn.ExecContext(ctx,
 		`INSERT INTO users (id, email, created_at) VALUES ($1, $2, $3)`,
 		u.Id, u.Email, u.CreatedAt)
 	return err
 }
 
-func (r *userRepository) ExistsUserByIdOrEmail(id, email string) (bool, error) {
+func (r *UserRepository) ExistsUserByIdOrEmail(ctx context.Context, id, email string) (bool, error) {
 	var exists bool
-	err := r.getExecer().QueryRowContext(context.Background(),
+	err := r.conn.QueryRowContext(ctx,
 		`SELECT EXISTS(SELECT 1 FROM users WHERE id = $1 OR email = $2)`, id, email).Scan(&exists)
 	return exists, err
 }
 
-func (r *userRepository) FindById(id string) (*user.User, error) {
+func (r *UserRepository) FindById(ctx context.Context, id string) (*user.User, error) {
 	var usr user.User
-	err := r.getExecer().QueryRowContext(context.Background(),
+	err := r.conn.QueryRowContext(ctx,
 		`SELECT id, email, created_at FROM users WHERE id = $1`, id).
 		Scan(&usr.Id, &usr.Email, &usr.CreatedAt)
 	if err != nil {

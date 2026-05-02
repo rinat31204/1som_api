@@ -2,6 +2,7 @@ package wire
 
 import (
 	"1som/internal/application/service"
+	"1som/internal/application/use_case/wallet"
 	"1som/internal/auth/application"
 	authFirebase "1som/internal/auth/infrastructure/firebase"
 	"1som/internal/delivery/http"
@@ -10,6 +11,7 @@ import (
 	infraFirebase "1som/internal/infrastructure/firebase"
 	"1som/internal/infrastructure/postgres"
 	"1som/internal/infrastructure/postgres/repository"
+	"database/sql"
 
 	"github.com/google/wire"
 )
@@ -21,7 +23,13 @@ var InfraSet = wire.NewSet(
 )
 
 var DBSet = wire.NewSet(
-	postgres.NewDB(),
+	postgres.NewDB,
+	wire.Bind(new(repository.DbTx), new(*sql.DB)),
+)
+
+var UseCaseSet = wire.NewSet(
+	wallet.NewWalletUseCaseImpl,
+	wire.Bind(new(wallet.GetWalletUseCase), new(*wallet.GetWalletUseCaseImpl)),
 )
 
 var RepositorySet = wire.NewSet(
@@ -29,10 +37,6 @@ var RepositorySet = wire.NewSet(
 	repository.NewWalletRepository,
 	repository.NewAccountRepository,
 	repository.NewTransactionRepository,
-)
-
-var UnitOfWorkSet = wire.NewSet(
-	postgres.NewUnitOfWorkFactory,
 )
 
 var AuthSet = wire.NewSet(
@@ -45,10 +49,6 @@ var HandlerSet = wire.NewSet(
 	handlers.NewUserHandler,
 	handlers.NewWalletHandler,
 	handlers.NewWinnersHandler,
-)
-
-var ServiceSet = wire.NewSet(
-	service.NewUserService,
 )
 
 var DeliverySet = wire.NewSet(

@@ -4,40 +4,22 @@ import (
 	"1som/internal/domain/account"
 	"context"
 	"database/sql"
+	"errors"
+
+	"github.com/google/uuid"
 )
 
-type accountRepository struct {
-	db *sql.DB
-	tx *sql.Tx
+type AccountRepository struct {
+	conn DbTx
 }
 
-func NewAccountRepository(conn interface{}) account.Repository {
-	switch v := conn.(type) {
-	case *sql.DB:
-		return &accountRepository{db: v}
-	case *sql.Tx:
-		return &accountRepository{tx: v}
-	default:
-		panic("unsupported connection type")
-	}
+func NewAccountRepository(conn DbTx) account.Repository {
+	return &AccountRepository{conn: conn}
 }
 
-func (r *accountRepository) execute() accountExec {
-	if r.tx != nil {
-		return r.tx
-	}
-	return r.db
-}
-
-type accountExec interface {
-	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
-	QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row
-	QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
-}
-
-func (r *accountRepository) Create(u *account.Account) error {
-	_, err := r.execute().ExecContext(context.Background(),
-		`INSERT INTO wallets (id,
+func (r *AccountRepository) Create(ctx context.Context, u *account.Account) error {
+	_, err := r.conn.ExecContext(ctx,
+		`INSERT INTO accounts (id,
                      				wallet_id,
                      				account_numberl,
                      				created_at,
@@ -52,4 +34,30 @@ func (r *accountRepository) Create(u *account.Account) error {
 		u.Balance,
 		u.Currency)
 	return err
+}
+
+func (r *AccountRepository) GetByWallet(ctx context.Context, walletId uuid.UUID) (*account.Account, error) {
+	var acc account.Account
+	err := r.conn.QueryRowContext(ctx,
+		`SELECT id,
+					  wallet_id,
+					  account_numberl,
+					  created_at,
+					  updated_at,
+					  balance,
+					  currency FROM accounts WHERE wallet_id = $1`, walletId).Scan(
+		&acc.Id,
+		&acc.WalletId,
+		&acc.AccountNumber,
+		&acc.CreatedAt,
+		&acc.UpdatedAt,
+		&acc.Balance,
+		&acc.Currency)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil // или ошибка domain.ErrUserNotFound
+		}
+		return nil, err
+	}
+	return &acc, nil
 }

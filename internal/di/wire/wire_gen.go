@@ -7,11 +7,15 @@
 package wire
 
 import (
+	"1som/internal/application/use_case/wallet"
 	"1som/internal/auth/application"
 	firebase2 "1som/internal/auth/infrastructure/firebase"
 	"1som/internal/delivery/http"
 	"1som/internal/delivery/http/handlers"
+	"1som/internal/infrastructure/eventbus/inmemory"
 	"1som/internal/infrastructure/firebase"
+	"1som/internal/infrastructure/postgres"
+	"1som/internal/infrastructure/postgres/repository"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,9 +27,17 @@ func InitializeApp() (*gin.Engine, error) {
 		return nil, err
 	}
 	provider := firebase2.NewFirebaseProvider(client)
-	authService := application.NewAuthService(provider)
+	eventBus := inmemory.NewEventBus()
+	authService := application.NewAuthService(provider, eventBus)
 	userHandler := handlers.NewUserHandler()
-	walletHandler := handlers.NewWalletHandler()
+	db, err := postgres.NewDB()
+	if err != nil {
+		return nil, err
+	}
+	walletRepository := repository.NewWalletRepository(db)
+	accountRepository := repository.NewAccountRepository(db)
+	getWalletUseCaseImpl := wallet.NewWalletUseCaseImpl(walletRepository, accountRepository)
+	walletHandler := handlers.NewWalletHandler(getWalletUseCaseImpl)
 	winnersHandler := handlers.NewWinnersHandler()
 	routerDeps := provideRouterDeps(authService, userHandler, walletHandler, winnersHandler)
 	engine := http.NewRouter(routerDeps)
