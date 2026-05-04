@@ -7,12 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const ContextUserKey = "auth_user"
+const ContextUserKey = "uid"
 
 func NewAuthMiddleware(authService application.AuthService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
+		token := c.GetHeader("Authorization")
+		if token == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": "authorization header required",
 			})
@@ -21,7 +21,7 @@ func NewAuthMiddleware(authService application.AuthService) gin.HandlerFunc {
 
 		user, err := authService.VerifyUser(
 			c.Request.Context(),
-			authHeader,
+			token,
 		)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
@@ -30,7 +30,7 @@ func NewAuthMiddleware(authService application.AuthService) gin.HandlerFunc {
 			return
 		}
 
-		c.Set(ContextUserKey, user)
+		c.Set(ContextUserKey, user.UID)
 
 		c.Next()
 	}
