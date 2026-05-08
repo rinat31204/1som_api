@@ -22,8 +22,13 @@ var InfraSet = wire.NewSet(
 	wire.Bind(new(service.EventBus), new(*inmemory.EventBus)),
 )
 
+var ServiceSet = wire.NewSet(
+	service.NewUserService,
+)
+
 var DBSet = wire.NewSet(
 	postgres.NewDB,
+	postgres.NewUnitOfWorkFactory,
 	wire.Bind(new(repository.DbTx), new(*sql.DB)),
 )
 

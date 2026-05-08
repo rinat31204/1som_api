@@ -4,19 +4,20 @@
 package wire
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 )
 
-func InitializeApp() (*gin.Engine, error) {
+func InitializeApp() (*App, error) {
 	wire.Build(
 		InfraSet,
 		DBSet,
 		UseCaseSet,
 		HandlerSet,
+		ServiceSet,
 		RepositorySet,
 		AuthSet,
 		DeliverySet,
+		wire.Struct(new(App), "*"),
 	)
 	return nil, nil
 }

@@ -32,6 +32,7 @@ func NewUserService(uowFactory func() unitOfWork.UnitOfWork, eventBus EventBus) 
 
 func (u *UserService) subscribe() {
 	u.eventBus.Subscribe(EventUserVerified, func(event any) {
+		slog.Info("EventUserVerified")
 		ev, ok := event.(UserVerifiedEvent)
 		if !ok {
 			return

@@ -6,12 +6,12 @@ import (
 )
 
 func main() {
-	r, err := wire.InitializeApp()
+	app, err := wire.InitializeApp()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := r.Run(":8080"); err != nil {
+	if err := app.Router.Run(":8080"); err != nil {
 		log.Fatal(err)
 	}
 }

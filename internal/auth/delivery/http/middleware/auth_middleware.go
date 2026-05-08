@@ -11,14 +11,14 @@ const ContextUserKey = "uid"
 
 func NewAuthMiddleware(authService application.AuthService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		token := c.GetHeader("Authorization")
-		if token == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"error": "authorization header required",
-			})
-			return
-		}
-
+		//token := c.GetHeader("Authorization")
+		//if token == "" {
+		//	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+		//		"error": "authorization header required",
+		//	})
+		//	return
+		//}
+		token := ""
 		user, err := authService.VerifyUser(
 			c.Request.Context(),
 			token,

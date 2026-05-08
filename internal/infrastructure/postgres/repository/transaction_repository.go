@@ -15,7 +15,7 @@ func NewTransactionRepository(conn DbTx) transaction.Repository {
 
 func (r *TransactionRepository) Create(ctx context.Context, u *transaction.Transaction) error {
 	_, err := r.conn.ExecContext(ctx,
-		`INSERT INTO wallets (id,
+		`INSERT INTO transactions (id,
                      account_number,
                      amount,
                      currency,

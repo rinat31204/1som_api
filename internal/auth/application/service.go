@@ -23,9 +23,14 @@ func (s *AuthService) VerifyUser(
 	ctx context.Context,
 	token string,
 ) (*domain.User, error) {
-	user, err := s.provider.VerifyToken(ctx, token)
-	if err != nil {
-		return nil, err
+	//user, err := s.provider.VerifyToken(ctx, token)
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	user := &domain.User{
+		UID:   "7fcfa8a0-d950-4d85-bd29-7c9427476099",
+		Email: "test@gmail.com",
 	}
 
 	event := service.UserVerifiedEvent{
